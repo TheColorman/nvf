@@ -81,6 +81,8 @@ with lib; let
     "project-nvim"
     "elixir-ls"
     "elixir-tools"
+    "nvim-dap"
+    "nvim-dap-ui"
   ];
   # You can either use the name of the plugin or a package.
   pluginsType = with types;
