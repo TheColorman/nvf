@@ -384,6 +384,11 @@
     };
 
     # Utilities
+    vim-wakatime = {
+      url = "github:wakatime/vim-wakatime";
+      flake = false;
+    };
+
     colorizer = {
       url = "github:uga-rosa/ccc.nvim";
       flake = false;
