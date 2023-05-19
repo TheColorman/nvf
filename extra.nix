@@ -115,6 +115,7 @@ inputs: let
           };
           view = {
             width = 25;
+            cursorline = false;
           };
         };
       };
