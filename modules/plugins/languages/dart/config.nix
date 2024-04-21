@@ -39,7 +39,6 @@ in {
 
     (mkIf cfg.lsp.enable {
       vim.lsp.lspconfig.enable = true;
-
       vim.lsp.lspconfig.sources.dart-lsp = servers.${cfg.lsp.server}.lspConfig;
     })
 
@@ -52,12 +51,12 @@ in {
       vim.luaConfigRC.flutter-tools = entryAnywhere ''
         require('flutter-tools').setup {
           lsp = {
-            color = { -- show the derived colours for dart variables
-              enabled = ${boolToString ftcfg.color.enable}, -- whether or not to highlight color variables at all, only supported on flutter >= 2.10
-              background = ${boolToString ftcfg.color.highlightBackground}, -- highlight the background
-              foreground = ${boolToString ftcfg.color.highlightForeground}, -- highlight the foreground
-              virtual_text = ${boolToString ftcfg.color.virtualText.enable}, -- show the highlight using virtual text
-              virtual_text_str = ${ftcfg.color.virtualText.character} -- the virtual text character to highlight
+            color = {
+              enabled = ${boolToString ftcfg.color.enable},
+              background = ${boolToString ftcfg.color.highlightBackground},
+              foreground = ${boolToString ftcfg.color.highlightForeground},
+              virtual_text = ${boolToString ftcfg.color.virtualText.enable},
+              virtual_text_str = ${toString ftcfg.color.virtualText.character}
             },
 
             capabilities = capabilities,

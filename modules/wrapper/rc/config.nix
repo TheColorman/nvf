@@ -1,5 +1,6 @@
 {
   config,
+  pkgs,
   lib,
   ...
 }: let
@@ -128,6 +129,24 @@ in {
         else abort ("Dependency cycle in ${name}: " + toJSON sortedDag);
     in
       result;
+
+    formatLua = {
+      name,
+      contents,
+      ...
+    }:
+      pkgs.runCommand name {inherit contents;} ''
+        touch $out
+        echo -n "$text" > "$out"
+
+        ${pkgs.stylua}/bin/stylua \
+          --column-width 80 \
+          --no-editorconfig \
+          --indent-type Spaces \
+          --indent-width 4 \
+          --collapse-simple-statement Never \
+          "$out"
+      '';
   in {
     vim = {
       configRC = {
@@ -138,8 +157,11 @@ in {
         luaScript = let
           mapResult = result: (wrapLuaConfig {
             luaBefore = "${cfg.luaConfigPre}";
-            luaConfig = concatStringsSep "\n" (map mkLuarcSection result);
             luaAfter = "${cfg.luaConfigPost}";
+            luaConfig = formatLua {
+              name = "lua";
+              contents = concatStringsSep "\n" (map mkLuarcSection result);
+            };
           });
 
           luaConfig = resolveDag {

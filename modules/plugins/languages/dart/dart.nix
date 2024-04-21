@@ -105,7 +105,7 @@ in {
 
           character = mkOption {
             type = str;
-            default = "■";
+            default = "...";
             description = "Virtual text character to highlight";
           };
         };
