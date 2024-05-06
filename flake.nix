@@ -14,6 +14,8 @@
       imports = [
         # add lib to module args
         {_module.args = {inherit (nixpkgs) lib;};}
+
+        ./flake/tests # machine tests for nvf
         ./flake/apps.nix
         ./flake/legacyPackages.nix
         ./flake/overlays.nix
