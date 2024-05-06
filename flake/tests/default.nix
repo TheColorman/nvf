@@ -22,6 +22,7 @@
   in {
     checks = packagesFromDirectoryRecursive {
       inherit callPackage;
+      testProfile = ../profiles/minimal.nix;
       directory = ./checks;
     };
 
