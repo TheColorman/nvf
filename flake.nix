@@ -89,6 +89,12 @@
       flake = false;
     };
 
+    # Primarily used for testing nvf.
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # TODO: get zig from the zig overlay instead of nixpkgs
     zig.url = "github:mitchellh/zig-overlay";
 

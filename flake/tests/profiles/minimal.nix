@@ -10,8 +10,4 @@
     isNormalUser = true;
     password = "";
   };
-
-  home-manager.sharedModules = [
-    {home.stateVersion = "24.05";}
-  ];
 }

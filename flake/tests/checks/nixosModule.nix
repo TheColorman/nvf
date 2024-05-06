@@ -4,7 +4,7 @@
   ...
 }:
 nixosTest {
-  name = "home-manager-test";
+  name = "nixos-test";
 
   nodes.machine = {
     imports = [
@@ -12,7 +12,9 @@ nixosTest {
       ../profiles/minimal.nix
     ];
 
-    programs.nvf.enable = true;
+    config = {
+      programs.nvf.enable = true;
+    };
   };
 
   testScript = "";

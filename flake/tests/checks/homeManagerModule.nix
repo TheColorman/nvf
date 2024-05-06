@@ -13,13 +13,16 @@ nixosTest {
       ../profiles/minimal.nix
     ];
 
-    home-manager = {
-      sharedModules = [
-        homeManagerModules.nvf
-      ];
+    config = {
+      home-manager = {
+        sharedModules = [
+          homeManagerModules.nvf
+        ];
 
-      users.test = {
-        programs.nvf.enable = true;
+        users.test = {
+          home.stateVersion = "24.05";
+          programs.nvf.enable = true;
+        };
       };
     };
   };
