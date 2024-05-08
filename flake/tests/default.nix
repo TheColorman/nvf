@@ -29,7 +29,7 @@
     # expose checks as packages to be built
     packages = {
       test-home-manager-module = self'.checks.homeManagerModule.driverInteractive;
-      # test-nixos-module = self'.checks.nixosModule.driverInteractive;
+      test-nixos-module = self'.checks.nixosModule.driverInteractive;
     };
   };
 }
