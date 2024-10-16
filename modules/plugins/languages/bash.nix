@@ -9,27 +9,18 @@
   inherit (lib.modules) mkIf mkMerge;
   inherit (lib.lists) isList;
   inherit (lib.types) enum either package listOf str bool;
-  inherit (lib.nvim.languages) diagnosticsToLua;
+  inherit (lib.nvim.languages) diagnosticsToLua mkLspConfig;
   inherit (lib.nvim.types) diagnostics mkGrammarOption;
   inherit (lib.nvim.lua) expToLua;
 
   cfg = config.vim.languages.bash;
 
-  defaultServer = "bash-ls";
+  defaultServer = "bashls";
   servers = {
-    bash-ls = {
+    bashls = mkLspConfig {
+      name = "bashls";
       package = pkgs.bash-language-server;
-      lspConfig = ''
-        lspconfig.bashls.setup{
-          capabilities = capabilities;
-          on_attach = default_on_attach;
-          cmd = ${
-          if isList cfg.lsp.package
-          then expToLua cfg.lsp.package
-          else ''{"${cfg.lsp.package}/bin/bash-language-server",  "start"}''
-        };
-        }
-      '';
+      args = ["start"];
     };
   };
 

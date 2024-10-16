@@ -4,7 +4,8 @@
   inherit (lib.options) mkOption;
   inherit (lib.types) bool;
   inherit (lib.meta) getExe;
-  inherit (lib.lists) isList optionals;
+  inherit (lib.strings) optionalString;
+  inherit (lib.lists) optionals;
   inherit (lib.generators) mkLuaInline;
   inherit (lib.nvim.attrsets) mapListToAttrs;
   inherit (lib.nvim.lua) toLuaObject;
@@ -46,17 +47,21 @@ in {
   # `on_attach`.
   # TODO: nixpkgs-like doc comments from that one RFC
   mkLspConfig = {
+    # Mandatory arguments
     name,
     package,
+    # Optional arguments for the sake of flexibility
     args ? [],
-    cmd ? [(getExe package)] ++ lib.optionals (args != []) args,
+    cmd ? [(getExe package)] ++ optionals (args != []) args,
     capabilities ? "capabilities",
     on_attach ? "on_attach",
+    init_opts ? "",
   }: let
     generatedConfig = {
       inherit cmd;
       capabilities = mkLuaInline capabilities;
       on_attach = mkLuaInline on_attach;
+      init_opts = mkLuaInline (optionalString (init_opts != "") init_opts);
     };
   in {
     inherit package;
