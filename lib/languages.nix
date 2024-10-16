@@ -3,7 +3,11 @@
   inherit (builtins) isString getAttr;
   inherit (lib.options) mkOption;
   inherit (lib.types) bool;
+  inherit (lib.meta) getExe;
+  inherit (lib.lists) isList optionals;
+  inherit (lib.generators) mkLuaInline;
   inherit (lib.nvim.attrsets) mapListToAttrs;
+  inherit (lib.nvim.lua) toLuaObject;
 in {
   # A wrapper around `mkOption` to create a boolean option that is
   # used for Language Server modules.
@@ -36,4 +40,28 @@ in {
       value = diagnosticsProviders.${type}.nullConfig package;
     })
     config;
+
+  # `mkLspConfig` is a helper function that generates a LspConfig configuration
+  # from at least a name and a package,  optionally also `capabilities`, and
+  # `on_attach`.
+  # TODO: nixpkgs-like doc comments from that one RFC
+  mkLspConfig = {
+    name,
+    package,
+    args ? [],
+    cmd ? [(getExe package)] ++ lib.optionals (args != []) args,
+    capabilities ? "capabilities",
+    on_attach ? "on_attach",
+  }: let
+    generatedConfig = {
+      inherit cmd;
+      capabilities = mkLuaInline capabilities;
+      on_attach = mkLuaInline on_attach;
+    };
+  in {
+    inherit package;
+    lspConfig = ''
+      lspconfig.${name}.setup(${toLuaObject generatedConfig})
+    '';
+  };
 }
