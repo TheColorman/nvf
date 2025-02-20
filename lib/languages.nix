@@ -46,7 +46,7 @@ in {
 
       on_attach = mkOption {
         type = luaInline;
-        default = mkLuaInline "default_capabilities";
+        default = mkLuaInline "default_on_attach";
         description = "Function to execute when an LSP server attaches to a buffer";
       };
 
