@@ -6,7 +6,7 @@
   inherit (lib.options) mkOption mkEnableOption;
   inherit (lib.lists) filter;
   inherit (lib.strings) optionalString;
-  inherit (lib.types) submodule listOf str bool;
+  inherit (lib.types) nullOr submodule listOf str bool;
   inherit (lib.nvim.types) luaInline;
   inherit (lib.nvim.lua) toLuaObject;
   inherit (lib.nvim.dag) entryAfter;
@@ -21,40 +21,46 @@
         };
 
       event = mkOption {
-        type = listOf str;
+        type = nullOr (listOf str);
+        default = null;
         example = ["BufRead" "BufWritePre"];
         description = "The event(s) that trigger the autocommand.";
       };
 
       pattern = mkOption {
-        type = listOf str;
+        type = nullOr (listOf str);
+        default = null;
         example = ["*.lua" "*.vim"];
         description = "The file pattern(s) that determine when the autocommand applies).";
       };
 
       callback = mkOption {
-        type = luaInline;
+        type = nullOr luaInline;
+        default = null;
         example = ''
           function()
               print("Saving a Lua file...")
           end,
         '';
-        description = "The file pattern(s) that determine when the autocommand applies).";
+        description = "The file pattern(s) that determine when the autocommand applies.";
       };
 
       command = mkOption {
-        type = str;
+        type = nullOr str;
+        default = null;
         description = "Vim command string instead of a Lua function.";
       };
 
       group = mkOption {
-        type = str;
+        type = nullOr str;
+        default = null;
         example = "MyAutoCmdGroup";
         description = "An optional autocommand group to manage related autocommands.";
       };
 
       desc = mkOption {
-        type = str;
+        type = nullOr str;
+        default = null;
         example = "Notify when saving a Lua file";
         description = "A description for the autocommand.";
       };
@@ -127,36 +133,51 @@ in {
     };
   };
 
-  config.vim = let
-    enabledAutocommands = filter (cmd: cmd.enable) cfg.autocmds;
-    enabledAutogroups = filter (au: au.enable) cfg.augroups;
-  in {
-    luaConfigRC = {
-      augroups = entryAfter ["pluginConfigs"] (optionalString (enabledAutogroups != []) ''
-        local nvf_autogroups = ${toLuaObject cfg.autogroups}
-        for group_name, options in pairs(nvf_autogroups) do
-          vim.api.nvim_create_augroup(group_name, options)
-        end
-      '');
+  config = {
+    vim = let
+      enabledAutocommands = filter (cmd: cmd.enable) cfg.autocmds;
+      enabledAutogroups = filter (au: au.enable) cfg.augroups;
+    in {
+      luaConfigRC = {
+        augroups = entryAfter ["pluginConfigs"] (optionalString (enabledAutogroups != []) ''
+          local nvf_autogroups = {}
+          for _, group in ipairs(${toLuaObject enabledAutogroups}) do
+            if group.name then
+              nvf_autogroups[group.name] = { clear = group.clear }
+            end
+          end
 
-      autocmds = entryAfter ["pluginConfigs"] (optionalString (enabledAutocommands != []) ''
-        local nvf_autocommands = ${toLuaObject enabledAutocommands}
-        for _, autocmd in ipairs(nvf_autocommands) do
-          vim.api.nvim_create_autocmd(
-            autocmd.event,
-            {
-              group     = autocmd.group,
-              pattern   = autocmd.pattern,
-              buffer    = autocmd.buffer,
-              desc      = autocmd.desc,
-              callback  = autocmd.callback,
-              command   = autocmd.command,
-              once      = autocmd.once,
-              nested    = autocmd.nested
-            }
-          )
-        end
-      '');
+          for group_name, options in pairs(nvf_autogroups) do
+            vim.api.nvim_create_augroup(group_name, options)
+          end
+        '');
+
+        autocmds = entryAfter ["pluginConfigs"] (optionalString (enabledAutocommands != []) ''
+          local nvf_autocommands = ${toLuaObject enabledAutocommands}
+          for _, autocmd in ipairs(nvf_autocommands) do
+            vim.api.nvim_create_autocmd(
+              autocmd.event,
+              {
+                group     = autocmd.group,
+                pattern   = autocmd.pattern,
+                buffer    = autocmd.buffer,
+                desc      = autocmd.desc,
+                callback  = autocmd.callback,
+                command   = autocmd.command,
+                once      = autocmd.once,
+                nested    = autocmd.nested
+              }
+            )
+          end
+        '');
+      };
     };
+
+    assertions = [
+      {
+        assertion = builtins.all (cmd: !(cmd.command != null && cmd.callback != null)) cfg.autocmds;
+        message = "An autocommand cannot have both 'command' and 'callback' defined at the same time.";
+      }
+    ];
   };
 }
